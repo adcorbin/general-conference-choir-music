@@ -742,7 +742,7 @@ const slugify = x => fold(x).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const encName = n => n.replace(/[^A-Za-z0-9-]/g, ch => '_' + ch.codePointAt(0).toString(16) + '_');
 const decName = n => n.replace(/_([0-9a-f]+)_/g, (_, h) => String.fromCodePoint(parseInt(h, 16)));
 const ARTIFACT_URL = 'https://claude.ai/artifact/8WHUueowm8NPu15AXrhjU6';
-const BASE_URL = /^(file:|https?:\/\/(localhost|127\.0\.0\.1)[:/])/.test(location.href) ? location.href.split('#')[0] : ARTIFACT_URL;
+const BASE_URL = BUILD_MEDIA === 'external' ? ARTIFACT_URL : location.href.split('#')[0];  // the artifact build shares claude.ai links; any other host (GitHub Pages, a file) shares its own address
 const playlistToken = (name, rows) => 'pl.' + encName(name) + '.' + rows.map(r => r.slug).join('.');
 const tokenFor = { song: k => 'song.' + slugify(k), choir: n => 'choir.' + slugify(n), conf: i => 'conf.' + slugify(CONFS[i].label), person: n => 'person.' + slugify(n) };
 
