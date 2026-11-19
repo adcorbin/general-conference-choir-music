@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Conference Choir Finder</title>
+<title>General Conference Choirs</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -563,7 +563,7 @@ button.dot:hover { border-color: var(--ink); }
 
 <header class="topbar">
   <div class="wrap">
-    <button class="brand" data-nav-home aria-label="Conference Choir Finder, home"><span class="sc">General Conference</span><span class="wm">Choir Finder</span></button>
+    <button class="brand" data-nav-home aria-label="General Conference Choirs, home"><span class="sc">General Conference</span><span class="wm">Choirs</span></button>
     <label class="field desk-only" for="q">
       <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
       <input id="q" type="search" placeholder="Search songs, choirs, composers, topics" autocomplete="off" aria-label="Search" enterkeyhint="search">
@@ -1485,7 +1485,7 @@ function render() {
   // A sheet's opener may have just been re-rendered; find its replacement so closing can return focus to it.
   if (sheetOpener && !document.contains(sheetOpener) && sheetOpenerSel) sheetOpener = $(sheetOpenerSel) || sheetOpener;
   renderTopBar(); renderTabBar(); markOverflow();
-  document.title = state.page.kind !== 'home' && state.page.title ? `${state.page.title} · Conference Choir Finder` : 'Conference Choir Finder';
+  document.title = state.page.kind !== 'home' && state.page.title ? `${state.page.title} · General Conference Choirs` : 'General Conference Choirs';
   patchAllPlaying();
 }
 function renderTopBar() {
