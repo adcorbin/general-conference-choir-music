@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>General Conference Choirs</title>
+<title>General Conference Choir Music</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -311,7 +309,7 @@ dialog.video video { display: block; width: 100%; background: #000; aspect-ratio
 .more { display: block; margin: var(--sp3) 0; }
 .about { text-align: center; font-size: 13px; color: var(--muted); padding: var(--sp6) 0 var(--sp3); text-wrap: balance; }
 
-/* Home: this season + programme + index */
+/* Home: this season + program + index */
 .season { display: flex; gap: var(--sp4); align-items: flex-start; padding: 2px 0 var(--sp3); }
 .season .cover { width: 88px; height: 88px; }
 .season .txt { display: grid; gap: 4px; min-width: 0; flex: 1 1 auto; }
@@ -563,7 +561,7 @@ button.dot:hover { border-color: var(--ink); }
 
 <header class="topbar">
   <div class="wrap">
-    <button class="brand" data-nav-home aria-label="General Conference Choirs, home"><span class="sc">General Conference</span><span class="wm">Choirs</span></button>
+    <button class="brand" data-nav-home aria-label="General Conference Choir Music, home"><span class="sc">General Conference</span><span class="wm">Choir Music</span></button>
     <label class="field desk-only" for="q">
       <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
       <input id="q" type="search" placeholder="Search songs, choirs, composers, topics" autocomplete="off" aria-label="Search" enterkeyhint="search">
@@ -650,7 +648,7 @@ const store = {
   set(k, v) { try { localStorage.setItem('gcm:' + k, JSON.stringify(v)); } catch {} },
   del(k) { try { localStorage.removeItem('gcm:' + k); } catch {} },
 };
-const BUILD_MEDIA = 'auto';
+const BUILD_MEDIA = 'external';
 
 const SESSION_GROUP = s =>
   /priesthood/i.test(s) ? 'Priesthood Session' :
@@ -921,7 +919,7 @@ function perfRow(s, o = {}) {
   if (s.solo.length) sub.push(`<span>feat. ${esc(s.solo.join(', '))}</span>`);
   if (o.arr && s.ar.length && !o.dateTitle) sub.push(`<span>Arr. ${s.ar.map(personLink).join(', ')}</span>`);
   const cls = ['perf', st.playing && 'playing', st.fav && 'fav', o.compact && 'compact', o.menu === false && 'nomenu', o.dateTitle && 'wrap2', o.sel && state.selectedDot === s.id && 'sel'].filter(Boolean).join(' ');
-  // Queue rows lead with the position as a real button, so keyboard users can jump to a track; programme rows lead with their number.
+  // Queue rows lead with the position as a real button, so keyboard users can jump to a track; program rows lead with their number.
   const lead = o.queue !== undefined ? `<button class="play pos" data-jump="${o.queue}" aria-label="Play ${esc(s.t)}, track ${o.queue + 1} of ${o.queueN}"><span class="n">${o.queue + 1}</span>${ICON(st.icon)}</button>`
     : o.num !== undefined && !EXT() ? `<button class="play pos" data-play="${s.id}" aria-label="${esc(st.label)}"><span class="n">${o.num}</span>${ICON(st.icon)}</button>`
     : o.art && !EXT() ? `<button class="play art" data-play="${s.id}" aria-label="${esc(st.label)}">${pipesSvg(s.conf)}${ICON(st.icon)}</button>`
@@ -1108,17 +1106,17 @@ function pageHome() {
   queueRows = latestRows; setQueue('hero', latestRows, latest.label + ' General Conference');
   const choirsN = new Set(latestRows.map(r => r.p).filter(p => p !== NOT_LISTED)).size, dur = latestRows.reduce((a, r) => a + r.d, 0);
   const phone = isPhone();
-  const acts = `<div class="acts">${EXT() ? extLink(siteUrl(latestRows[0]), 'Listen') : `<button class="btn-play" data-playrows="hero" aria-label="Play programme, ${n} recordings"><span class="sq">${ICON('play')}</span>Play programme</button><button class="btn" data-shuffle="hero"><span class="u">Shuffle</span></button>`}<a class="btn" data-nav href="#${tokenFor.conf(li)}"><span class="u">Open programme</span>${ICON('chev-right')}</a></div>`;
+  const acts = `<div class="acts">${EXT() ? extLink(siteUrl(latestRows[0]), 'Listen') : `<button class="btn-play" data-playrows="hero" aria-label="Play program, ${n} recordings"><span class="sq">${ICON('play')}</span>Play program</button><button class="btn" data-shuffle="hero"><span class="u">Shuffle</span></button>`}<a class="btn" data-nav href="#${tokenFor.conf(li)}"><span class="u">Open program</span>${ICON('chev-right')}</a></div>`;
   const season = `<section class="season"><div class="pair">${coverHtml(latest, 'mid')}<div class="txt"><span class="sc">This season</span><h1>${esc(latest.label)}</h1><div class="meta">${plural(n, 'recording')} · ${plural(choirsN, 'choir')} · ${fmtLong(dur)}</div>${acts}</div></div>
     ${EXT() ? `<div class="notice">${ICON('external')}<span>Playback opens on churchofjesuschrist.org from this page.</span></div>` : ''}</section>`;
-  // The programme: the latest conference's order of music under its session heads, like a printed programme.
+  // The program: the latest conference's order of music under its session heads, like a printed program.
   const LIMIT = phone ? 6 : 8, shown = latestRows.slice(0, LIMIT);
   let rows = '', lastS = null;
   shown.forEach((s, i) => {
     if (s.s !== lastS) { lastS = s.s; const who = [...new Set(latestRows.filter(x => x.s === s.s).map(x => x.p))]; rows += `<div class="sec-h"><h2>${esc(s.s)}</h2><span class="who">${who.map(w => w === NOT_LISTED ? 'Choir not yet listed' : esc(phone ? shortChoir(w) : w)).join(', ')}</span></div>`; }
     rows += perfRow(s, { num: i + 1, conf: false, choir: false, nosub: true, menu: false });
   });
-  const prog = `<section class="prog perfs" data-queue="hero" aria-label="Programme">${rows}${n > LIMIT ? `<a class="more-link" data-nav href="#${tokenFor.conf(li)}">${n - LIMIT} more in this programme${ICON('chev-right')}</a>` : ''}</section>`;
+  const prog = `<section class="prog perfs" data-queue="hero" aria-label="Program">${rows}${n > LIMIT ? `<a class="more-link" data-nav href="#${tokenFor.conf(li)}">${n - LIMIT} more in this program${ICON('chev-right')}</a>` : ''}</section>`;
   const nChoirs = CHOIR_NAMES.filter(n => n !== NOT_LISTED).length;
   const idx = `<nav class="idx" aria-label="Browse">${[['songs', 'Songs', 'Songs', SONG_KEYS.length], ['choirs', 'Choirs', 'Choirs', nChoirs], ['conferences', 'Conferences', 'Conferences', CONFS.length], ['people', 'People', 'Composers &amp; arrangers', PEOPLE_NAMES.length]]
     .map(([t, short, long, k]) => `<a data-nav href="#${t}"><span class="l"><span class="short">${short}</span><span class="long">${long}</span>${t === 'conferences' ? `<span class="strip">${dotGrid([], { all: true })}</span>` : ''}</span><span class="n">${k}</span></a>`).join('')}</nav>`;
@@ -1325,7 +1323,7 @@ function pageConf() {
   const rows = sortPerfs(applyRefine(all), currentSort('conf'));
   queueRows = rows;
   const choirs = [...new Set(all.map(p => p.p))].filter(p => p !== NOT_LISTED), dur = all.reduce((a, r) => a + r.d, 0);
-  const head = collectionHeader({ eyebrow: 'General Conference', kicker: true, title: c.label, cover: coverHtml(c, 'mid'), playLabel: 'Play programme', meta: `${plural(all.length, 'recording')} · ${plural(choirs.length, 'choir')}${dur ? ' · ' + fmtLong(dur) : ''}`,
+  const head = collectionHeader({ eyebrow: 'General Conference', kicker: true, title: c.label, cover: coverHtml(c, 'mid'), playLabel: 'Play program', meta: `${plural(all.length, 'recording')} · ${plural(choirs.length, 'choir')}${dur ? ' · ' + fmtLong(dur) : ''}`,
     share: tokenFor.conf(i), shareWhat: c.label, site: all[0] ? siteUrl(all[0]) : '', refine: 'conf', sort: 'conf', sentence: refineSentence(rows.length, all.length, 'recordings') });
   const has = j => songs.some(s => s.c === j);
   const prev = [...CONFS.keys()].filter(j => j < i && has(j)).pop(), next = [...CONFS.keys()].find(j => j > i && has(j));
@@ -1485,7 +1483,7 @@ function render() {
   // A sheet's opener may have just been re-rendered; find its replacement so closing can return focus to it.
   if (sheetOpener && !document.contains(sheetOpener) && sheetOpenerSel) sheetOpener = $(sheetOpenerSel) || sheetOpener;
   renderTopBar(); renderTabBar(); markOverflow();
-  document.title = state.page.kind !== 'home' && state.page.title ? `${state.page.title} · General Conference Choirs` : 'General Conference Choirs';
+  document.title = state.page.kind !== 'home' && state.page.title ? `${state.page.title} · General Conference Choir Music` : 'General Conference Choir Music';
   patchAllPlaying();
 }
 function renderTopBar() {
@@ -2225,5 +2223,3 @@ enter(bootToken, { fresh: true });
 measureChrome();
 })();
 </script>
-
-</html>

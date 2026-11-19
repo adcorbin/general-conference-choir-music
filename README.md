@@ -1,4 +1,4 @@
-# General Conference Choirs
+# General Conference Choir Music
 
 Every song from General Conference, April 2008 to today, organized by song, choir, conference, and composer, with a player.
 
