@@ -2088,7 +2088,7 @@ audio.addEventListener('error', () => {
   // native mode treats a bad URL as one bad recording, never as a reason to remove every play control.
   if (!EXT() && !everPlayed && !mediaDecided && (code === 2 || code === 4)) {
     mediaDecided = true; setMedia('external');
-    toast('Audio can’t play on this page, so play controls open the Church site. <button class="link" data-media-native>Try again</button>', 8000); return;
+    toast(EXT_TOAST, 8000); return;
   }
   const more = player.idx < player.queue.length - 1 ? ` <button class="link" data-skip>Skip</button>` : '';
   toast(`This recording won’t play here. <a href="${esc(siteUrl(player.current))}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Listen on the Church site</a>${more}`, 0);
@@ -2199,6 +2199,7 @@ function setMedia(m) {
     updateMiniBar(); render();
   } else if (m !== 'external' && was === 'external') render();
 }
+const EXT_TOAST = 'Audio can’t play on this page, so play controls open the Church site. <button class="link" data-media-native>Try again</button>';
 function probeMedia() {
   let li = CONFS.length - 1; while (li > 0 && !songs.some(s => s.c === li)) li--;
   const first = songs.find(s => s.c === li);
@@ -2206,7 +2207,7 @@ function probeMedia() {
   const a = new Audio(); a.preload = 'metadata';
   a.addEventListener('loadedmetadata', () => { mediaDecided = true; if (state.media === 'auto') setMedia('native'); }, { once: true });
   // A probe failure after the user already started playing the main element proves nothing: leave it alone.
-  a.addEventListener('error', () => { if (state.media === 'auto' && (!player.current || player.pending) && !everPlayed) { mediaDecided = true; setMedia('external'); } }, { once: true });
+  a.addEventListener('error', () => { if (state.media === 'auto' && (!player.current || player.pending) && !everPlayed) { mediaDecided = true; setMedia('external'); toast(EXT_TOAST, 8000); } }, { once: true });
   setTimeout(() => { if (state.media === 'auto') setMedia('native'); }, 2500);
   a.src = first.u; a.load();
 }
