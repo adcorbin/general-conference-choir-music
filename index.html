@@ -863,14 +863,24 @@ const plural = (n, w, ws = w + 's') => `${n} ${n === 1 ? w : ws}`;
 const fmtLong = sec => { const m = Math.round(sec / 60), h = Math.floor(m / 60); return h ? `${h} h ${m % 60} min` : `${m} min`; };
 const fmtHours = sec => { const h = Math.round(sec / 3600); return h ? `${h} h` : fmtLong(sec); };
 // Season artwork: seven organ pipes. The tallest pipe's position is set by the conference date.
-const PIPE_COLORS = { oct: ['#A3542E', '#D9A05B', '#7B2D2A'], apr: ['#5F7F52', '#A8B88E', '#C9A94A'] };
+// Cover art: seven organ pipes in one color on a tinted ground, drawn in code (SVG for the page, the same paths on a canvas for
+// lock-screen artwork). The tallest pipe moves with the year, and each season rotates through three palettes by year.
+const PIPE_PALETTES = {
+  oct: [['#EBD9BC', '#7B2D2A'], ['#F0DFC6', '#A3542E'], ['#E7D0A8', '#6B4A1E']],
+  apr: [['#DCE4CF', '#5F7F52'], ['#E4EAD9', '#A67A22'], ['#D4DFCC', '#4E7A78']],
+};
 function pipeParts(c) {
-  const oct = c.m !== 4, cols = oct ? PIPE_COLORS.oct : PIPE_COLORS.apr, p = (c.y * 2 + (oct ? 1 : 0)) % 7;
-  return { bg: oct ? '#EBD9BC' : '#DCE4CF', pipes: [...Array(7)].map((_, i) => { const h = 80 - 10 * Math.abs(i - p), x = 9 + 12 * i; return { x, h, y: 86 - h, color: cols[i % 3] }; }) };
+  const oct = c.m !== 4, [bg, ink] = PIPE_PALETTES[oct ? 'oct' : 'apr'][c.y % 3], p = (c.y * 2 + (oct ? 1 : 0)) % 7;
+  const pipes = [...Array(7)].map((_, i) => { const x = 11 + 12 * i, top = 10 + 9 * Math.abs(i - p); return { x, top }; });
+  return { bg, ink, pipes };
 }
+// One pipe: a rounded cap, a straight body, a mouth cut two thirds down, and a foot that tapers to a point on the base rail.
+const pipePath = ({ x, top }) => `M${x} ${top + 3}A3 3 0 0 1 ${x + 6} ${top + 3}V67L${x + 3} 88L${x} 67Z`;
+const mouthPath = ({ x }) => `M${x + 1.2} 60.5H${x + 4.8}V62.6H${x + 1.2}Z`;
+const RAIL = 'M7 92Q50 88 93 92Q50 90.6 7 92Z';
 function pipesSvg(c, attrs = '') {
-  const { bg, pipes } = pipeParts(c);
-  return `<svg class="tile" viewBox="0 0 100 100" aria-hidden="true"${attrs}><rect width="100" height="100" fill="${bg}"/>${pipes.map(p => `<rect x="${p.x}" y="${p.y}" width="9" height="${p.h}" rx="1" fill="${p.color}"/><rect x="${p.x + 2}" y="${(86 - 0.3 * p.h).toFixed(1)}" width="5" height="2" fill="#1F1A15" fill-opacity="0.35"/><polygon points="${p.x + 1},86 ${p.x + 8},86 ${p.x + 4.5},90" fill="${p.color}"/>`).join('')}<rect x="6" y="90" width="88" height="1.5" fill="#1F1A15" fill-opacity="0.35"/></svg>`;
+  const { bg, ink, pipes } = pipeParts(c);
+  return `<svg class="tile" viewBox="0 0 100 100" aria-hidden="true"${attrs}><rect width="100" height="100" fill="${bg}"/><path fill="${ink}" d="${pipes.map(pipePath).join('')}${RAIL}"/><path fill="${bg}" d="${pipes.map(mouthPath).join('')}"/></svg>`;
 }
 const coverHtml = (c, size = 'mid') => `<div class="cover ${size}">${pipesSvg(c)}<div class="ov"><span class="sc">${c.m === 4 ? 'April' : 'October'}</span><b>${c.y}</b></div></div>`;
 const shortChoir = p => p.replace(/^The Tabernacle Choir at Temple Square$/, 'Tabernacle Choir');
@@ -2124,14 +2134,12 @@ function artworkFor(s) {  // the conference's organ-pipe tile with its month and
   const c = s.conf, key = c.y + '-' + c.m;
   if (!artCache.has(key)) {
     try {
-      const cv = document.createElement('canvas'); cv.width = cv.height = 512; const g = cv.getContext('2d'), { bg, pipes } = pipeParts(c), k = 5.12;
+      const cv = document.createElement('canvas'); cv.width = cv.height = 512; const g = cv.getContext('2d'), { bg, ink, pipes } = pipeParts(c), k = 5.12;
       g.fillStyle = bg; g.fillRect(0, 0, 512, 512);
-      pipes.forEach(p => {
-        g.fillStyle = p.color; g.fillRect(p.x * k, p.y * k, 9 * k, p.h * k);
-        g.beginPath(); g.moveTo((p.x + 1) * k, 86 * k); g.lineTo((p.x + 8) * k, 86 * k); g.lineTo((p.x + 4.5) * k, 90 * k); g.closePath(); g.fill();
-        g.fillStyle = 'rgba(31,26,21,0.35)'; g.fillRect((p.x + 2) * k, (86 - 0.3 * p.h) * k, 5 * k, 2 * k);
-      });
-      g.fillStyle = 'rgba(31,26,21,0.35)'; g.fillRect(6 * k, 90 * k, 88 * k, 1.5 * k);
+      g.save(); g.scale(k, k);
+      g.fillStyle = ink; g.fill(new Path2D(pipes.map(pipePath).join('') + RAIL));
+      g.fillStyle = bg; g.fill(new Path2D(pipes.map(mouthPath).join('')));
+      g.restore();
       g.textAlign = 'right'; g.textBaseline = 'top';
       try { g.letterSpacing = '4px'; } catch {}
       g.fillStyle = '#7B2D2A'; g.font = '600 26px "Public Sans", system-ui, sans-serif'; g.fillText(c.m === 4 ? 'APRIL' : 'OCTOBER', 472, 34);
