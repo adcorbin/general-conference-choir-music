@@ -1080,7 +1080,7 @@ const SORTS = {
   conferences: [['new', 'Newest'], ['old', 'Oldest']],
   people: [['count', 'Most works'], ['az', 'A–Z']],
   choir: [['new', 'Newest'], ['old', 'Oldest'], ['az', 'Title A–Z']],
-  conf: [['prog', 'Program order'], ['az', 'Title A–Z']],
+  conf: [['prog', 'Conference order'], ['az', 'Title A–Z']],
   person: [['count', 'Most performed'], ['new', 'Newest'], ['az', 'A–Z']],
 };
 const REL_KINDS = ['songs', 'tracks', 'choirs'];
@@ -1106,7 +1106,7 @@ function pageHome() {
   queueRows = latestRows; setQueue('hero', latestRows, latest.label + ' General Conference');
   const choirsN = new Set(latestRows.map(r => r.p).filter(p => p !== NOT_LISTED)).size, dur = latestRows.reduce((a, r) => a + r.d, 0);
   const phone = isPhone();
-  const acts = `<div class="acts">${EXT() ? extLink(siteUrl(latestRows[0]), 'Listen') : `<button class="btn-play" data-playrows="hero" aria-label="Play program, ${n} recordings"><span class="sq">${ICON('play')}</span>Play program</button><button class="btn" data-shuffle="hero"><span class="u">Shuffle</span></button>`}<a class="btn" data-nav href="#${tokenFor.conf(li)}"><span class="u">Open program</span>${ICON('chev-right')}</a></div>`;
+  const acts = `<div class="acts">${EXT() ? extLink(siteUrl(latestRows[0]), 'Listen') : `<button class="btn-play" data-playrows="hero" aria-label="Play conference, ${n} recordings"><span class="sq">${ICON('play')}</span>Play conference</button><button class="btn" data-shuffle="hero"><span class="u">Shuffle</span></button>`}<a class="btn" data-nav href="#${tokenFor.conf(li)}"><span class="u">Open conference</span>${ICON('chev-right')}</a></div>`;
   const season = `<section class="season"><div class="pair">${coverHtml(latest, 'mid')}<div class="txt"><span class="sc">This season</span><h1>${esc(latest.label)}</h1><div class="meta">${plural(n, 'recording')} · ${plural(choirsN, 'choir')} · ${fmtLong(dur)}</div>${acts}</div></div>
     ${EXT() ? `<div class="notice">${ICON('external')}<span>Playback opens on churchofjesuschrist.org from this page.</span></div>` : ''}</section>`;
   // The program: the latest conference's order of music under its session heads, like a printed program.
@@ -1116,7 +1116,7 @@ function pageHome() {
     if (s.s !== lastS) { lastS = s.s; const who = [...new Set(latestRows.filter(x => x.s === s.s).map(x => x.p))]; rows += `<div class="sec-h"><h2>${esc(s.s)}</h2><span class="who">${who.map(w => w === NOT_LISTED ? 'Choir not yet listed' : esc(phone ? shortChoir(w) : w)).join(', ')}</span></div>`; }
     rows += perfRow(s, { num: i + 1, conf: false, choir: false, nosub: true, menu: false });
   });
-  const prog = `<section class="prog perfs" data-queue="hero" aria-label="Program">${rows}${n > LIMIT ? `<a class="more-link" data-nav href="#${tokenFor.conf(li)}">${n - LIMIT} more in this program${ICON('chev-right')}</a>` : ''}</section>`;
+  const prog = `<section class="prog perfs" data-queue="hero" aria-label="Conference">${rows}${n > LIMIT ? `<a class="more-link" data-nav href="#${tokenFor.conf(li)}">${n - LIMIT} more in this conference${ICON('chev-right')}</a>` : ''}</section>`;
   const nChoirs = CHOIR_NAMES.filter(n => n !== NOT_LISTED).length;
   const idx = `<nav class="idx" aria-label="Browse">${[['songs', 'Songs', 'Songs', SONG_KEYS.length], ['choirs', 'Choirs', 'Choirs', nChoirs], ['conferences', 'Conferences', 'Conferences', CONFS.length], ['people', 'People', 'Composers &amp; arrangers', PEOPLE_NAMES.length]]
     .map(([t, short, long, k]) => `<a data-nav href="#${t}"><span class="l"><span class="short">${short}</span><span class="long">${long}</span>${t === 'conferences' ? `<span class="strip">${dotGrid([], { all: true })}</span>` : ''}</span><span class="n">${k}</span></a>`).join('')}</nav>`;
@@ -1323,7 +1323,7 @@ function pageConf() {
   const rows = sortPerfs(applyRefine(all), currentSort('conf'));
   queueRows = rows;
   const choirs = [...new Set(all.map(p => p.p))].filter(p => p !== NOT_LISTED), dur = all.reduce((a, r) => a + r.d, 0);
-  const head = collectionHeader({ eyebrow: 'General Conference', kicker: true, title: c.label, cover: coverHtml(c, 'mid'), playLabel: 'Play program', meta: `${plural(all.length, 'recording')} · ${plural(choirs.length, 'choir')}${dur ? ' · ' + fmtLong(dur) : ''}`,
+  const head = collectionHeader({ eyebrow: 'General Conference', kicker: true, title: c.label, cover: coverHtml(c, 'mid'), playLabel: 'Play conference', meta: `${plural(all.length, 'recording')} · ${plural(choirs.length, 'choir')}${dur ? ' · ' + fmtLong(dur) : ''}`,
     share: tokenFor.conf(i), shareWhat: c.label, site: all[0] ? siteUrl(all[0]) : '', refine: 'conf', sort: 'conf', sentence: refineSentence(rows.length, all.length, 'recordings') });
   const has = j => songs.some(s => s.c === j);
   const prev = [...CONFS.keys()].filter(j => j < i && has(j)).pop(), next = [...CONFS.keys()].find(j => j > i && has(j));
