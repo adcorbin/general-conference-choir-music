@@ -863,24 +863,24 @@ const plural = (n, w, ws = w + 's') => `${n} ${n === 1 ? w : ws}`;
 const fmtLong = sec => { const m = Math.round(sec / 60), h = Math.floor(m / 60); return h ? `${h} h ${m % 60} min` : `${m} min`; };
 const fmtHours = sec => { const h = Math.round(sec / 3600); return h ? `${h} h` : fmtLong(sec); };
 // Season artwork: seven organ pipes. The tallest pipe's position is set by the conference date.
-// Cover art: seven organ pipes in one color on a tinted ground, drawn in code (SVG for the page, the same paths on a canvas for
-// lock-screen artwork). The tallest pipe moves with the year, and each season rotates through three palettes by year.
+// Cover art: seven organ pipes in three alternating colors on a tinted ground, drawn in code (SVG for the page, the same paths
+// on a canvas for lock-screen artwork). The tallest pipe moves with the year, and each season rotates three palettes by year.
 const PIPE_PALETTES = {
-  oct: [['#EBD9BC', '#7B2D2A'], ['#F0DFC6', '#A3542E'], ['#E7D0A8', '#6B4A1E']],
-  apr: [['#DCE4CF', '#5F7F52'], ['#E4EAD9', '#A67A22'], ['#D4DFCC', '#4E7A78']],
+  oct: [['#EBD9BC', ['#A3542E', '#D9A05B', '#7B2D2A']], ['#F0DFC6', ['#7B2D2A', '#B8863B', '#A3542E']], ['#E7D0A8', ['#6B4A1E', '#A3542E', '#D9A05B']]],
+  apr: [['#DCE4CF', ['#5F7F52', '#A8B88E', '#C9A94A']], ['#E4EAD9', ['#4E7A78', '#5F7F52', '#C9A94A']], ['#D4DFCC', ['#A67A22', '#5F7F52', '#8FA27A']]],
 };
 function pipeParts(c) {
-  const oct = c.m !== 4, [bg, ink] = PIPE_PALETTES[oct ? 'oct' : 'apr'][c.y % 3], p = (c.y * 2 + (oct ? 1 : 0)) % 7;
-  const pipes = [...Array(7)].map((_, i) => { const x = 11 + 12 * i, top = 10 + 9 * Math.abs(i - p); return { x, top }; });
-  return { bg, ink, pipes };
+  const oct = c.m !== 4, [bg, cols] = PIPE_PALETTES[oct ? 'oct' : 'apr'][c.y % 3], p = (c.y * 2 + (oct ? 1 : 0)) % 7;
+  const pipes = [...Array(7)].map((_, i) => { const x = 11 + 12 * i, top = 10 + 9 * Math.abs(i - p); return { x, top, color: cols[i % 3] }; });
+  return { bg, ink: cols[0], pipes };
 }
-// One pipe: a rounded cap, a straight body, a mouth cut two thirds down, and a foot that tapers to a point on the base rail.
-const pipePath = ({ x, top }) => `M${x} ${top + 3}A3 3 0 0 1 ${x + 6} ${top + 3}V67L${x + 3} 88L${x} 67Z`;
+// One pipe: a rounded cap, a straight body, a mouth cut two thirds down, and a foot that narrows to a small rounded tip on the base rail.
+const pipePath = ({ x, top }) => `M${x} ${top + 3}A3 3 0 0 1 ${x + 6} ${top + 3}V67L${x + 4} 86.6A1 1 0 0 1 ${x + 2} 86.6L${x} 67Z`;
 const mouthPath = ({ x }) => `M${x + 1.2} 60.5H${x + 4.8}V62.6H${x + 1.2}Z`;
 const RAIL = 'M7 92Q50 88 93 92Q50 90.6 7 92Z';
 function pipesSvg(c, attrs = '') {
   const { bg, ink, pipes } = pipeParts(c);
-  return `<svg class="tile" viewBox="0 0 100 100" aria-hidden="true"${attrs}><rect width="100" height="100" fill="${bg}"/><path fill="${ink}" d="${pipes.map(pipePath).join('')}${RAIL}"/><path fill="${bg}" d="${pipes.map(mouthPath).join('')}"/></svg>`;
+  return `<svg class="tile" viewBox="0 0 100 100" aria-hidden="true"${attrs}><rect width="100" height="100" fill="${bg}"/>${pipes.map(p => `<path fill="${p.color}" d="${pipePath(p)}"/>`).join('')}<path fill="${ink}" fill-opacity="0.7" d="${RAIL}"/><path fill="${bg}" d="${pipes.map(mouthPath).join('')}"/></svg>`;
 }
 const coverHtml = (c, size = 'mid') => `<div class="cover ${size}">${pipesSvg(c)}<div class="ov"><span class="sc">${c.m === 4 ? 'April' : 'October'}</span><b>${c.y}</b></div></div>`;
 const shortChoir = p => p.replace(/^The Tabernacle Choir at Temple Square$/, 'Tabernacle Choir');
@@ -2137,7 +2137,8 @@ function artworkFor(s) {  // the conference's organ-pipe tile with its month and
       const cv = document.createElement('canvas'); cv.width = cv.height = 512; const g = cv.getContext('2d'), { bg, ink, pipes } = pipeParts(c), k = 5.12;
       g.fillStyle = bg; g.fillRect(0, 0, 512, 512);
       g.save(); g.scale(k, k);
-      g.fillStyle = ink; g.fill(new Path2D(pipes.map(pipePath).join('') + RAIL));
+      pipes.forEach(p => { g.fillStyle = p.color; g.fill(new Path2D(pipePath(p))); });
+      g.globalAlpha = 0.7; g.fillStyle = ink; g.fill(new Path2D(RAIL)); g.globalAlpha = 1;
       g.fillStyle = bg; g.fill(new Path2D(pipes.map(mouthPath).join('')));
       g.restore();
       g.textAlign = 'right'; g.textBaseline = 'top';
