@@ -1,3 +1,5 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>General Conference Choir Music</title>
@@ -651,7 +653,7 @@ const store = {
   set(k, v) { try { localStorage.setItem('gcm:' + k, JSON.stringify(v)); } catch {} },
   del(k) { try { localStorage.removeItem('gcm:' + k); } catch {} },
 };
-const BUILD_MEDIA = 'external';
+const BUILD_MEDIA = 'auto';
 
 const SESSION_GROUP = s =>
   /priesthood/i.test(s) ? 'Priesthood Session' :
@@ -2238,3 +2240,5 @@ enter(bootToken, { fresh: true });
 measureChrome();
 })();
 </script>
+
+</html>
